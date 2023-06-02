@@ -31,9 +31,9 @@ open class ApkSoLibStreamlineTask @Inject constructor(
 
     @TaskAction
     fun run() {
-        android.applicationVariants.all { variant ->
-            if (variant.name == variantName) {
-                val apkFile: File? = getApkFile(variant)
+        android.applicationVariants.forEach {
+            if (it.name == variantName) {
+                val apkFile: File? = getApkFile(it)
                 if (apkFile == null) {
                     log("apk文件目录未找到定义,请升级插件")
                     System.exit(2)
@@ -45,7 +45,7 @@ open class ApkSoLibStreamlineTask @Inject constructor(
                     streamlineApkSoFile(apkFile)
                 }
                 if (newApk?.exists() == true) {
-                    val signApk = ApkSign.sign(newApk, variant)
+                    val signApk = ApkSign.sign(newApk, it)
                     newApk.delete()
                     if (pluginConfig.backupApk) {
                         apkFile.renameTo(File(apkFile.parentFile, "backup-" + apkFile.name))
@@ -65,15 +65,16 @@ open class ApkSoLibStreamlineTask @Inject constructor(
 
     private fun getApkFile(variant: ApkVariant): File? {
         var outputFile: File? = null
-        variant.outputs.all { output: BaseVariantOutput ->
+        variant.outputs.forEach {
             try {
                 outputFile = File(
                     variant.packageApplicationProvider.get().outputDirectory.get().asFile.absolutePath,
-                    output.outputFile.name
+                    it.outputFile.name
                 )
             } catch (e: Exception) {
+                e.printStackTrace()
             } finally {
-                outputFile = outputFile ?: output.outputFile
+                outputFile = outputFile ?: it.outputFile
             }
         }
         return outputFile

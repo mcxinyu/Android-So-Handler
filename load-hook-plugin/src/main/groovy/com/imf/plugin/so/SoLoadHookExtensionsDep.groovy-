@@ -1,0 +1,12 @@
+package com.imf.plugin.so
+
+
+public class SoLoadHookExtensionsDep {
+    Set<String> excludePackage = []
+    boolean isSkipRAndBuildConfig = true
+
+    SoLoadHookExtensionsDep() {
+    }
+
+
+}

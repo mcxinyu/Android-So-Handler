@@ -11,3 +11,10 @@
 ```shell
 7z a out.7z input -t7z -mx=9 -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on -mhcf
 ```
+
+
+## 打包
+
+先压缩出 aar `zip -j p7z/executable/p7z.aar p7z/executable/*`
+
+再发布到 maven `./gradlew -q -P userPlugin=false clean publishToMavenLocal`

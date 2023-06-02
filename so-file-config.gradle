@@ -82,10 +82,10 @@ SoFileConfig {
  *
  * 具体可查看 load-hook 库
  * implementation "com.imf.so:load-hook:x.x.x"*/
-apply plugin: 'SoLoadHookPlugin'
+apply plugin: 'com.imf.plugin.so.SoLoadHookPlugin'
 SoLoadHookConfig {
     // 是否跳过 R 文件与 BuildConfig
-    isSkipRAndBuildConfig = true
+    skipRAndBuildConfig = true
     // 设置跳过的包名, 跳过的包不去 hook 修改后请先 clean
 //    excludePackage = ['com.imf.test']
 }

@@ -5,7 +5,8 @@ import com.google.gradle.osdetector.OsDetector
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import java.io.*
+import java.io.File
+import java.io.FileNotFoundException
 import java.util.Collections
 import java.util.stream.Collectors
 import java.util.zip.ZipFile
@@ -33,16 +34,16 @@ abstract class SoFilePlugin : Plugin<Project> {
                     pluginConfig.exe7zName = find7zPath(project)
                 }
                 log("p7z path: ${pluginConfig.exe7zName}")
-                afterProjectEvaluate(it)
+                afterProjectEvaluate(this)
             }
         }
     }
 
     private fun find7zPath(project: Project): String {
         val p7zConfig = project.configurations.create("ApkSoFileAdjustLocatorP7z") {
-            it.isVisible = false
-            it.isTransitive = false
-            it.setExtendsFrom(Collections.emptyList())
+            isVisible = false
+            isTransitive = false
+            setExtendsFrom(Collections.emptyList())
         }
 
         val osdetector = project.extensions.getByType(OsDetector::class.java)
@@ -154,19 +155,16 @@ class SoFileAttachMergeTaskPlugin : SoFilePlugin() {
 class ApkSoFileAdjustPlugin : SoFilePlugin() {
     override fun afterProjectEvaluate(project: Project) {
         super.afterProjectEvaluate(project)
-        android.applicationVariants.all { variant ->
-            val variantName = variant.name
-            createTask(project, variantName)
+        android.applicationVariants.forEach {
+            createTask(project, it.name)
         }
 
-        android.buildTypes.all { buildType ->
-            val buildTypeName = buildType.name
-            createTask(project, buildTypeName)
+        android.buildTypes.forEach {
+            createTask(project, it.name)
         }
 
-        android.productFlavors.all { flavor ->
-            val flavorName = flavor.name
-            createTask(project, flavorName)
+        android.productFlavors.forEach {
+            createTask(project, it.name)
         }
     }
 

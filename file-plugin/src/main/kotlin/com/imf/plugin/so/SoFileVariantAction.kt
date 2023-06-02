@@ -10,7 +10,7 @@ import java.io.File
  */
 class SoFileVariantAction(val variantName: String, val extension: SoFileExtensions, val intermediatesDir: File) : Action<Any?> {
 
-    override fun execute(input: Any?) {
+    override fun execute(input: Any) {
         val soHandle = SoHandle( extension, AssetsOutDestManager(variantName, intermediatesDir))
         val mergedNativeLibsFile = buildMergedNativeLibsFile(variantName)
         soHandle.singlePerform7z(mergedNativeLibsFile, null)

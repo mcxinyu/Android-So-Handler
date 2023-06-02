@@ -1,8 +1,6 @@
 package com.imf.plugin.so
 
 import com.android.build.api.transform.*
-import com.android.build.gradle.internal.pipeline.ExtendedContentType
-import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
 import java.io.File
 import java.util.concurrent.Executors
@@ -11,11 +9,15 @@ class SoFileTransform(val extension: SoFileExtensions, val intermediatesDir: Fil
     override fun getName(): String = "soFileTransform"
 
     override fun getInputTypes(): MutableSet<QualifiedContent.ContentType> {
-        return mutableSetOf(ExtendedContentType.NATIVE_LIBS)
+        // TODO: error
+        return mutableSetOf(QualifiedContent.DefaultContentType.CLASSES)
     }
 
-    override fun getScopes(): MutableSet<in QualifiedContent.Scope> =
-        TransformManager.SCOPE_FULL_PROJECT;
+    override fun getScopes(): MutableSet<in QualifiedContent.Scope> = mutableSetOf(
+        QualifiedContent.Scope.PROJECT,
+        QualifiedContent.Scope.SUB_PROJECTS,
+        QualifiedContent.Scope.EXTERNAL_LIBRARIES
+    )
 
     override fun isIncremental(): Boolean = false
 

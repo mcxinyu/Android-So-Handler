@@ -1,6 +1,7 @@
 package com.imf.so.assets.load;
 
-import com.android.annotations.Nullable;
+import androidx.annotation.Nullable;
+
 import com.imf.so.assets.load.bean.SoFileInfo;
 
 import java.io.File;
