@@ -16,8 +16,8 @@ pluginManagement {
 
 //    plugins {
 //        if (userPlugin.toBoolean()) {
-//            id("SoLoadHookPlugin") version "${SO_PLUGIN_VERSION}" apply false
-//            id("ApkSoFileAdjustPlugin") version "$SO_PLUGIN_VERSION" apply false
+//            id("com.imf.plugin.so.SoLoadHookPlugin") version "${SO_PLUGIN_VERSION}"
+//            id("com.imf.plugin.so.ApkSoFileAdjustPlugin") version "$SO_PLUGIN_VERSION"
 //        }
 //    }
 }

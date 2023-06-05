@@ -15,7 +15,7 @@
  **/
 //apply plugin: 'SoFileTransformPlugin'
 //apply plugin: 'SoFileAttachMergeTaskPlugin'
-apply plugin: 'ApkSoFileAdjustPlugin'
+apply plugin: 'com.imf.plugin.so.ApkSoFileAdjustPlugin'
 SoFileConfig {
     /**
      * 总开关配置

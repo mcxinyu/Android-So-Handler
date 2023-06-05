@@ -10,15 +10,15 @@ plugins {
 
 gradlePlugin {
     val soFileTransformPlugin by plugins.creating {
-        id = "SoFileTransformPlugin"
+        id = "com.imf.plugin.so.SoFileTransformPlugin"
         implementationClass = "com.imf.plugin.so.SoFileTransformPlugin"
     }
     val soFileAttachMergeTaskPlugin by plugins.creating {
-        id = "SoFileAttachMergeTaskPlugin"
+        id = "com.imf.plugin.so.SoFileAttachMergeTaskPlugin"
         implementationClass = "com.imf.plugin.so.SoFileAttachMergeTaskPlugin"
     }
     val apkSoFileAdjustPlugin by plugins.creating {
-        id = "ApkSoFileAdjustPlugin"
+        id = "com.imf.plugin.so.ApkSoFileAdjustPlugin"
         implementationClass = "com.imf.plugin.so.ApkSoFileAdjustPlugin"
     }
 }
