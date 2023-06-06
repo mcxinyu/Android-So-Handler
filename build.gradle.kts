@@ -4,8 +4,10 @@ buildscript {
     val SO_PLUGIN_VERSION: String by extra
 
     dependencies {
-        classpath("com.imf.so:load-hook-plugin:${SO_PLUGIN_VERSION}")
-        classpath("com.imf.so:file-plugin:${SO_PLUGIN_VERSION}")
+        if (userPlugin.toBoolean()) {
+            classpath("com.imf.so:load-hook-plugin:${SO_PLUGIN_VERSION}")
+            classpath("com.imf.so:file-plugin:${SO_PLUGIN_VERSION}")
+        }
     }
 }
 

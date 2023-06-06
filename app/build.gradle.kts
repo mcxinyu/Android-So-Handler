@@ -1,3 +1,5 @@
+import android.annotation.SuppressLint
+
 val userPlugin: String by project
 
 plugins {
@@ -14,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.imf.test"
         minSdk = 14
-        targetSdk = 33
+        targetSdk = 28
 
         versionCode = 1
         versionName = "1.0"
@@ -25,25 +27,34 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.findByName("debug")
 
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
-    }
-    flavorDimensions += listOf("default")
-    productFlavors {
-        create("ioTestV7a") {
-            dimension = "default"
-            ndk.abiFilters += listOf("armeabi-v7a")
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
-        create("ioTestV8a") {
-            dimension = "default"
-            ndk.abiFilters += listOf("arm64-v8a")
+    }
+//    flavorDimensions += listOf("default")
+//    productFlavors {
+//        create("ioTestV7a") {
+//            dimension = "default"
+//            ndk.abiFilters += listOf("armeabi-v7a")
+//        }
+//        create("ioTestV8a") {
+//            dimension = "default"
+//            ndk.abiFilters += listOf("arm64-v8a")
+//        }
+//    }
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("libs")
         }
     }
     compileOptions {
@@ -58,7 +69,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(project(":testLibrary"))
     implementation(files("libs/aar-release.aar"))
-    implementation("com.mainli:blur:1.0.0")
+    implementation("com.github.mainlxl:blur:1.0.1")
 }
 
 if (userPlugin.toBoolean()) {

@@ -3,6 +3,7 @@ package com.imf.test;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     stringBuilder.append("子工程引入: ").append(NativeTestLibrary.stringFromJNI()).append('\n');
                     stringBuilder.append("Maven引入: >背景图片变模糊<");
                     tv.setText(stringBuilder.toString());
-                    image.setImageBitmap(BitmapBlur.blur(bitmap, 9));
+                    image.setImageBitmap(BitmapBlur.blurBitmap(bitmap, 9));
                     updateCacheDir();
                 }
             }, 100);
@@ -160,7 +161,9 @@ public class MainActivity extends AppCompatActivity {
                         //内容伸展到NavigationBar下
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         //分别设置stateBar与NavigationBar背景颜色
-        window.setStatusBarColor(Color.TRANSPARENT);
-        window.setNavigationBarColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+        }
     }
 }
