@@ -1,6 +1,8 @@
-val GROUP_ID: String by project
-val SO_PLUGIN_VERSION: String by project
-val ANDROID_GRADLE_VERSION: String by project
+import org.jetbrains.kotlin.konan.properties.loadProperties
+val properties = loadProperties("${rootDir.parent}/gradle.properties")
+val GROUP_ID: String by properties
+val SO_PLUGIN_VERSION: String by properties
+val ANDROID_GRADLE_VERSION: String by properties
 
 plugins {
     `kotlin-dsl`

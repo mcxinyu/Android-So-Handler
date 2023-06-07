@@ -67,29 +67,3 @@ SoFileConfig {
      * 或者反射 System.loadLibrary 等跳过 hook 加载 so 库等场景 */
     customDependencies = ['libsource.so': ['liblog.so']]
 }
-/**
- * so 库加载 Hook 插件
- * 通过 com.imf.so.SoLoadHook#setSoLoadProxy(com.imf.so.SoLoadProxy)
- * 设置加载代理
- * 加载代理指编辑期间插件修改 java.lang.System#load(java.lang.String) 与
- * java.lang.System#loadLibrary(java.lang.String) 为
- * com.imf.so.SoLoadHook#load(java.lang.String) 与
- * com.imf.so.SoLoadHook#loadLibrary(java.lang.String)
- * 防止递归被 Hook 代理
- * 1. 继承 com.imf.so.SoLoadProxy 的类不会被修改 内部类会被修改
- * 2.excludePackage 跳过指定包名不会被修改
- * 3. 使用 @KeepSystemLoadLib 注解不会被修改
- *
- * 具体可查看 load-hook 库
- * implementation "com.imf.so:load-hook:x.x.x"*/
-apply plugin: 'com.imf.plugin.so.SoLoadHookPlugin'
-SoLoadHookConfig {
-    // 是否跳过 R 文件与 BuildConfig
-    skipRAndBuildConfig = true
-    // 设置跳过的包名, 跳过的包不去 hook 修改后请先 clean
-//    excludePackage = ['com.imf.test']
-}
-dependencies {
-    implementation "com.imf.so:load-hook:${SO_PLUGIN_VERSION}"
-    implementation "com.imf.so:load-assets-7z:${SO_PLUGIN_VERSION}"
-}

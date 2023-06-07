@@ -1,6 +1,5 @@
 package com.imf.plugin.so
 
-import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
 import com.android.build.api.instrumentation.ClassData
@@ -9,7 +8,6 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.FileSystemLocation
 import org.objectweb.asm.ClassVisitor
 
 open class SoLoadHookPlugin : Plugin<Project> {
@@ -18,8 +16,6 @@ open class SoLoadHookPlugin : Plugin<Project> {
             val config = create("SoLoadHookConfig", SoLoadHookExtensions::class.java)
             val androidComponents = findByType(AndroidComponentsExtension::class.java)
             androidComponents?.onVariants { variant ->
-//                val get = variant.artifacts.get(SingleArtifact.PUBLIC_ANDROID_RESOURCES_LIST)
-//                println(get)
                 variant.instrumentation.transformClassesWith(
                     SoLoadHookClassVisitorFactory::class.java,
                     InstrumentationScope.ALL
@@ -37,7 +33,7 @@ open class SoLoadHookPlugin : Plugin<Project> {
             classContext: ClassContext,
             nextClassVisitor: ClassVisitor
         ): ClassVisitor {
-            println("classContext ${classContext.currentClassData.className}")
+//            println("classContext ${classContext.currentClassData.className}")
             return LoadLibraryVisitor(nextClassVisitor)
         }
 
@@ -51,7 +47,7 @@ open class SoLoadHookPlugin : Plugin<Project> {
                 className.startsWith("com.imf.plugin.so.") -> false
                 parameters.get().excludePackage.any { className.startsWith(it) } -> false
                 parameters.get().skipRAndBuildConfig &&
-                    className.contains(Regex(".BuildConfig|.R2$*|.R$*")) -> false
+                        className.contains(Regex(".BuildConfig|.R2$*|.R$*")) -> false
 
                 else -> true
             }
