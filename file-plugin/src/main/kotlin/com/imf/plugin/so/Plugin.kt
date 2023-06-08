@@ -104,6 +104,7 @@ abstract class SoFilePlugin : Plugin<Project> {
     }
 }
 
+@Deprecated("use ApkSoFileAdjustPlugin")
 class SoFileTransformPlugin : SoFilePlugin() {
     override fun apply(project: Project) {
         super.apply(project)
@@ -111,7 +112,7 @@ class SoFileTransformPlugin : SoFilePlugin() {
     }
 }
 
-@Deprecated("")
+@Deprecated("use ApkSoFileAdjustPlugin")
 class SoFileAttachMergeTaskPlugin : SoFilePlugin() {
     override fun afterProjectEvaluate(project: Project) {
         super.afterProjectEvaluate(project)

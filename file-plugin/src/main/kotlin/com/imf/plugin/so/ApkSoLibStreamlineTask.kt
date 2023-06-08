@@ -80,6 +80,12 @@ open class ApkSoLibStreamlineTask @Inject constructor(
         return outputFile
     }
 
+    /**
+     * 使用 apkTool 工具访问 apk 后处理 so
+     *
+     * @param apk
+     * @return
+     */
     open fun streamlineApkSoFileByApkTool(apk: File?): File? {
         if (apk == null || !apk.exists()) {
             return null
@@ -284,6 +290,12 @@ open class ApkSoLibStreamlineTask @Inject constructor(
         else list
     }
 
+    /**
+     * 直接当成 zip 解压后处理 so
+     *
+     * @param apk
+     * @return
+     */
     open fun streamlineApkSoFile(apk: File?): File? {
         if (apk == null || !apk.exists()) {
             return null
