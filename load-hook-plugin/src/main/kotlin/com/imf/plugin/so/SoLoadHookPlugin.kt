@@ -16,14 +16,17 @@ open class SoLoadHookPlugin : Plugin<Project> {
             val config = create("SoLoadHookConfig", SoLoadHookExtensions::class.java)
             val androidComponents = findByType(AndroidComponentsExtension::class.java)
             androidComponents?.onVariants { variant ->
-                variant.instrumentation.transformClassesWith(
-                    SoLoadHookClassVisitorFactory::class.java,
-                    InstrumentationScope.ALL
-                ) {
-                    it.skipRAndBuildConfig = config.skipRAndBuildConfig
-                    it.excludePackage = config.excludePackage
+                if (config.enable) {
+                    variant.instrumentation.transformClassesWith(
+                        SoLoadHookClassVisitorFactory::class.java,
+                        InstrumentationScope.ALL
+                    ) {
+                        it.enable = config.enable
+                        it.skipRAndBuildConfig = config.skipRAndBuildConfig
+                        it.excludePackage = config.excludePackage
+                    }
+                    variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
                 }
-                variant.instrumentation.setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
             }
         }
     }

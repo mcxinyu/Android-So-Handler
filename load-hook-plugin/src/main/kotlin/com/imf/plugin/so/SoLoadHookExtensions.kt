@@ -6,6 +6,9 @@ import java.io.Serializable
 
 open class SoLoadHookExtensions : InstrumentationParameters, Serializable {
     @get:Input
+    var enable: Boolean = true
+
+    @get:Input
     var excludePackage: Set<String> = emptySet()
 
     @get:Input
