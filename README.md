@@ -1,40 +1,12 @@
 # Android-So-Handler
 
-### Jitpack 接入方式
+[![](https://jitpack.io/v/mcxinyu/Android-So-Handler.svg)](https://jitpack.io/#mcxinyu/Android-So-Handler)
 
-[![](https://jitpack.io/v/Android-Mainli/Android-So-Handler.svg)](https://jitpack.io/#Android-Mainli/Android-So-Handler)
+最新 2.0 版本支持 Android Gradle Plugin 8.x，其他版本不做支持保证，理论上 agp 7.2 以上是可以兼容的[了解更多](https://developer.android.com/build/releases/gradle-plugin-api-updates#replacement_apis)。
 
-因为接入 Jitpack 后，暂时没有合并到主仓库，所以接入方式（maven 仓库链接）需要先按下面方法修改，其他的依旧按原仓库说明操作。
+新版变化，参考 [releases](https://github.com/mcxinyu/Android-So-Handler/releases)。
 
-```groovy "根目录 gradle.properties"
-buildscript {
-    repositories {
-        maven("https://jitpack.io")
-    }
-    dependencies {
-        // ...
-        if (userSoPlugin) {
-            classpath("com.github.Android-Mainli:Android-So-Handler:load-hook-plugin:${Versions.so_plugin_version}")
-            classpath("com.github.Android-Mainli:Android-So-Handler:file-plugin:${Versions.so_plugin_version}")
-        }
-    }
-}
-```
-
-```groovy "app module gradle.properties"
-repositories {
-    maven("https://jitpack.io")
-}
-dependencies {
-    implementation "com.github.Android-Mainli:Android-So-Handler:load-hook:${Versions.so_plugin_version}"
-    implementation "com.github.Android-Mainli:Android-So-Handler:load-assets-7z:${Versions.so_plugin_version}"
-}
-```
-
----
-
-** 减包工具集合 , 通过处理 so 库实现减包 **
-> PS：减 so 文件时很有必要了解 so 来自那个三方或者一方库知己知彼，这里推荐我另一个项目 [AnalyzeSoPlugin](https://github.com/Android-Mainli/AnalyzeSoPlugin) 去溯源
+AGP7.x 及以下请切换到 [main-agp7.x](https://github.com/mcxinyu/Android-So-Handler/tree/main-agp7.x) 分支，原 README 请阅读 [main-agp7.x/README.md](https://github.com/mcxinyu/Android-So-Handler/blob/main-agp7.x/README.md)。
 
 ## 特点如下:
 
@@ -47,190 +19,93 @@ dependencies {
    自行下载，并在下载后调用 `SoFileInfo#insertOrUpdateCache(saveLibsDir,File)` 插入缓存即可，**
    需要在加载前插入缓存 **
 
-## 数据对比:
+## 开始使用:
 
-仅仅在加载时通过记录的 MD5 判断是否存在，不存在解压，存在则跳过直接加载。
-这里通过压缩时记录的 MD5 判断是否需要解压更新不依赖 apk 版本减少解压次数。
+工件包发布在 [Jitpack](https://jitpack.io/#mcxinyu/Android-So-Handler)，目前插件未发布到 Gradle 官方 Gradle Plugin Portal，所以，需要通过 `buildscript-dependencies-classpath` 来声明，不能使用 `plugins-id` 的方式。
 
-|      so 库名称       |   apk 包中所占大小    | 7z 极限压缩大小 |    解压后实际大小     | 解压耗时 (毫秒) |
-|:-----------------:|:---------------:|:---------:|:--------------:|:---------:|
-|   RTCStatistics   |  1331kb(1.3M)   |   958kb   | 2752kb(2.68M)  |    109    |
-| flutter(Debug 版本) | 10,547kb(10.3M) |  6360kb   | 23358kb(22.8M) |    700    |
-| bd_idl_pass_token |      9.6k       |    8kb    |      17kb      |     3     |
-|    idl_license    |     63.3kb      |   51kb    |     113kb      |     6     |
-|      FaceSDK      |     269.5kb     |   220kb   |     450kb      |    25     |
-|     turbonet      | 1,638.4kb(1.6M) |  1258kb   |     2737kb     |    167    |
-|   gnustl_shared   |     273.7kb     |   195kb   |     693kb      |    28     |
-|    xiaoyuhost     |     426.9kb     |   309kb   |   1009kb(1M)   |    48     |
-|    crab_native    |     57.7kb      |   44kb    |     109kb      |     7     |
+### 引入依赖
 
-> **apk 包中所占大小:** apk 属于 zip 压缩 所以 apk 包中已经为 zip 压缩后大小
->
-> **7z 极限压缩大小:** 7z 极限压缩大小是执行 7z a xxx.7z libxxx.so -t7z -mx=9 -m0=LZMA2 -ms=10m
-> -mf=on -mhc=on -mmt=on -mhcf 压缩后大小
->
-> ** 解压后实际大小:** 指 so 文件实际大小,AndroidStudio 中文件大小
->
-> ** 解压耗时 (毫秒):** 统计手机为谷歌 **Pixel 2XL** 骁龙 **835** 处理器
+`maven("https://jitpack.io")` 可添加到 `settings.gradle` 的 `dependencyResolutionManagement` 模块中。[参考 settings.gradle.kts](settings.gradle.kts)
 
-# 接入方式如下:
-
-ps: 配置较多全可走默认 ~_ ~!
-
-0. 前往 [Release](https://github.com/Android-Mainli/Android-So-Handler/releases)
-   下载对应版本 `maven.zip` 解压并放入项目根目录
-
-1. 根 build.gradle 中加入
-
-```groovy
+```kotlin "build.gradle.kts"
 buildscript {
+    val userSoPlugin by extra
+    val SO_PLUGIN_VERSION by extra
     repositories {
-        maven { url uri("${rootDir}/maven") }
+        maven("https://jitpack.io")
     }
-}
-allprojects {
-    repositories {
-        maven { url uri("${rootDir}/maven") }
+    dependencies {
+        if (userSoPlugin) {
+            classpath("com.github.Android-Mainli:Android-So-Handler:load-hook-plugin:${SO_PLUGIN_VERSION}")
+            classpath("com.github.Android-Mainli:Android-So-Handler:file-plugin:${SO_PLUGIN_VERSION}")
+        }
     }
 }
 ```
 
-2. 复制工程下 [so-file-config.gradle](so-file-config.gradle) 到工程根目录
-
-3. 工程根目录 **gradle.properties** 中添加 `SO_PLUGIN_VERSION=x.x.x`
-   **build.gradle** 中添加 `classpath "com.imf.so:load-hook-plugin:${SO_PLUGIN_VERSION}"`
-   和 `classpath "com.imf.so:file-plugin:${SO_PLUGIN_VERSION}"`
-
-   > x.x.x 修改为从 [Release](https://github.com/Android-Mainli/Android-So-Handler/releases) 下载的版本
-   如：0.0.7
-
-4. **app** 的 **build.gradle** 中添加 `apply from: "${rootDir}/so-file-config.gradle"`
-
-5. 在 Application 中调用 `AssetsSoLoadBy7zFileManager.init(v.getContext());` 初始化, 重载方法支持传入
-   NeedDownloadSoListener 完成云端所需要 so 库下载, 下载后使用 SoFileInfo#insertOrUpdateCache(
-   saveLibsDir,File) 插入缓存中
-
-6. 修改根目录中 [so-file-config.gradle](so-file-config.gradle) 进行压缩删减库配置主要修改
-   deleteSoLibs 与 compressSo2AssetsLibs 如下:
-
-```groovy
-// 指定编辑阶段要删除的 so 库
-deleteSoLibs = []
-// 指定至 assets 中的 so 库
-compressSo2AssetsLibs = []
-```
-
-** 其他配置请参考注释 **
-
-## 插件介绍
-
-## 一、 SoLoadHookPlugin 插件
-
-1. 通过 Hook `System.loadLibrary` 与 `System.load` 实现加载转发具体步骤如下:
-
-    * 通过 `ASM` 框架对 Hook 目标类进行字节码修改具体为 `System.loadLibrary` 与 `System.load`
-      修改成 `SoLoadHook.loadLibrary` 与 `SoLoadHook.load`
-    * `SoLoadHook` 可设置 `SoLoadProxy` 完成对外代理
-
-   > `SoLoadHook` 有默认实现只是调用 `System.loadLibrary` 与 `System.load`
-
-2. 具体接入步骤如下:
-
-* gradle 配置
-
-```groovy
-//build.gradle 中只加入
-classpath "com.imf.so:load-hook-plugin:${SO_PLUGIN_VERSION}"
-//app.gradle 中只配置
-apply plugin: 'SoLoadHookPlugin'
-SoLoadHookConfig {
-    // 是否跳过 R 文件与 BuildConfig
-    isSkipRAndBuildConfig = true
-    // 设置跳过的包名, 跳过的包不去 hook 修改后请先 clean
-    excludePackage = ['com.imf.test.']
-}
+```kotlin "app/build.gradle.kts"
 dependencies {
-    implementation "com.imf.so:load-hook:${SO_PLUGIN_VERSION}"
+    val SO_PLUGIN_VERSION by project
+    listOf(
+        "com.github.mcxinyu.Android-So-Handler:load-hook:$SO_PLUGIN_VERSION",
+        "com.github.mcxinyu.Android-So-Handler:load-assets-7z:$SO_PLUGIN_VERSION"
+    ).forEach(::implementation)
 }
 ```
 
-* java 代码实现 `SoLoadProxy` 完成加载
+### 配置
 
-```java
-public interface SoLoadProxy {
-    void loadLibrary(String libName);
+参考 [so-file-config.gradle](so-file-config.gradle) groovy 写法。
 
-    void load(String filename);
+或者 [build.gradle.kts](app/build.gradle.kts) kts 中使用有条件的动态语法。
+
+下面是 kts 的常规写法，与 groovy 类似：
+```kotlin
+SoFileConfig {
+    /**
+     * 总开关配置 不配置时根据 compressSo2AssetsLibs 与 deleteSoLibs 是否为空自动开启关闭 配置 true 强制开启 false 强制关闭
+     */
+    // enable = false
+    // 设置 debug 下不删除与压缩 so 库
+    excludeBuildTypes = setOf("debug")
+    forceNeededRetainAllDependencies = true
+    backupApk = true
+    useApktool = true
+    // 设置要删除的 so 库
+    deleteSoLibs = emptySet()
+    // 移除 so 时回调，这里可以做上传云端的逻辑
+    onDeleteSo = { file, md5 ->
+        // 可以返回一个 so 文件的下载链接，可通过 md5 判断缓存读取链接，如果没有则上传云端并返回链接
+        // 作者在实际项目中是在此处将 so 压缩后上传云端，在 NeedDownloadSoListener 中下载，调用 insertOrUpdateCache 前解压。
+    }
+    // 设置要压缩的库 注意 libun7zip.so 为 7z 解压库不可压缩
+    compressSo2AssetsLibs = setOf()
+    // 排除依赖
+    excludeDependencies = setOf(
+        "libun7zip.so",
+        "libmmkv.so",
+    )
+    /**
+     * 配置自定义依赖 用于解决 a.so 并未声明依赖 b.so 并且内部通过 dlopen 打开 b.so 或者反射 System.loadLibrary 等跳过 hook 加载 so
+     * 库等场景
+     */
+    customDependencies = mapOf(
+        // "libflutter.so" to listOf("libapp.so")
+    )
 }
-SoLoadHook.setSoLoadProxy(new XXXSoLoadProxy())
+
+SoLoadHookConfig {
+    // 默认启用的
+    enable = true
+    // 是否跳过 R 文件与 BuildConfig
+    skipRAndBuildConfig = true
+    // 设置跳过的包名, 跳过的包不去 hook 修改后请先 clean
+    excludePackage = setOf(
+        "com.imf.so"
+    )
+}
 ```
 
-> 实现 SoLoadProxy 类后不会被修改 `System.loadLibrary` 与 `System.load` 字节码
-> 如果不想在指定包名下修改 在 excludePackage 中配置报名
-> 如果不想在指定类或方法下被修改字节码, 请添加注解 @KeepSystemLoadLib
+### 其他
 
-## 二、~~SoFileTransformPlugin 与 SoFileAttachMergeTaskPlugin 插件依赖
-
-SoLoadHookPlugin~~, 使用 ApkSoFileAdjustPlugin
-
-~~SoFileTransformPlugin~~ 与 ~~SoFileAttachMergeTaskPlugin~~ 功能一样只是编辑阶段插入口不同
-根据 com.android.tools.build:gradle:x.x.x 中版本号不同选择使用哪个
-3.4.0 版本及以下使用 SoFileTransformPlugin
-3.5.0 - 3.6.0 版本使用 SoFileAttachMergeTaskPlugin
-4.1.0 以上包含 7.3.0 版本使用 ApkSoFileAdjustPlugin
-
-> 4.1.0 中添加了 compressed_assets 机制导致无法把压缩后的 so 文件放入 asstes 中顾调整为针对已出包
-> apk 进行 so 文件操作并重新签名
-
-1. 通过实现 transform 或在 mergeNativeLibs 中添加 Action 的方式, 对 so 库进行 7z 压缩 (利用压缩差实现压缩
-   apk), 压缩后放入 `asstes` 下的 `jniLib`
-2. 根据压缩或删除 so 情况生成 `info.json`
-3. 运行时进行解压加载 so
-
-> 1. so 库依赖拷贝了 [ReLinker](https://github.com/KeepSafe/ReLinker) 中解析代码
-> 2. 解压部分微调自 [AndroidUn7z](https://github.com/hzy3774/AndroidUn7zip)
-
-** 接入方式参考顶部最开始部分 **
-
-## 三、常见问题
-
-1. 安装时报错 `Failure [INSTALL_FAILED_INVALID_APK: Failed to extract native libraries, res=-2]`
-
-   请在 `application` 标签添加属性 `android:extractNativeLibs="true"` 如下：
-
-   ```xml
-   <?xml version="1.0" encoding="utf-8"?>
-   <manifest ...>
-       <application android:extractNativeLibs="true">
-         ...
-   </manifest>
-   
-   ```
-
-   > 关于 extractNativeLibs 属性
-   >
-   > - 进行 apk 打包时，`android:extractNativeLibs=false` 会对 Module 中的 so 库进行压缩，最终得到的
-       apk 体积较小。
-       >
-    - ` 好处是：` 用户在应用市场下载和升级时，因为消耗的流量较小，用户有更强的下载和升级意愿。
-   > - ` 缺点是：` 因为 so 是压缩存储的，因此用户安装时，系统会将 so
-       解压出来，重新存储一份。因此安装时间会变长，占用的用户磁盘存储空间反而会增大。
-   > - `minSdkVersion < 23 或 Android Gradle plugin < 3.6.0`
-       ，打包时默认值 `android:extractNativeLibs=true`；
-   > - `minSdkVersion >= 23 并且 Android Gradle plugin >= 3.6.0`
-       ，打包时默认值 `android:extractNativeLibs=false`；
-   >
-   > apk 对比 7z 是本插件压缩后版本 false/true 代表 extractNativeLibs 属性版本，可以下载 [apk](apk)
-   拖入 Android Studio 查看如：![size](apk/size.png)
-   >
-   > | apk 路径                                        | apk 大小 | 下载大小 |
-   > | ---------------------------------------------- | ------- | -------- |
-   > | [app-debug-7z.apk](apk/app-debug-7z.apk)       | 2.5MB   | 2.4MB    |
-   > | [app-debug-false.apk](apk/app-debug-false.apk) | 3.8MB   | 2.6MB    |
-   > | [app-debug-true.apk](apk/app-debug-true.apk)   | 3.1MB   | 2.6MB    |
-
-
-
-感谢[mcxinyu](https://github.com/mcxinyu)的贡献。也欢迎加我微信进行交流 x
-
-![wechat](wechat.jpg)
+其他注意事项请阅读[原说明](https://github.com/mcxinyu/Android-So-Handler/blob/main-agp7.x/README.md)
