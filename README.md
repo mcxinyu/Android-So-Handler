@@ -21,11 +21,13 @@ AGP7.x 及以下请切换到 [main-agp7.x](https://github.com/mcxinyu/Android-So
 
 ## 开始使用:
 
-工件包发布在 [Jitpack](https://jitpack.io/#mcxinyu/Android-So-Handler)，目前插件未发布到 Gradle 官方 Gradle Plugin Portal，所以，需要通过 `buildscript-dependencies-classpath` 来声明，不能使用 `plugins-id` 的方式。
+工件包发布在 [Jitpack](https://jitpack.io/#mcxinyu/Android-So-Handler)
+
+目前插件未发布到 Gradle 官方 Gradle Plugin Portal，所以，需要通过以下方式引入，暂时不能使用 `plugins` 块的方式。
 
 ### 引入依赖
 
-`maven("https://jitpack.io")` 可添加到 `settings.gradle` 的 `dependencyResolutionManagement` 模块中。[参考 settings.gradle.kts](settings.gradle.kts)
+此处 `maven("https://jitpack.io")` 也可添加到 `settings.gradle` 的 `dependencyResolutionManagement` 模块中。[参考 settings.gradle.kts](settings.gradle.kts)
 
 ```kotlin "build.gradle.kts"
 buildscript {
@@ -36,14 +38,19 @@ buildscript {
     }
     dependencies {
         if (userSoPlugin) {
-            classpath("com.github.Android-Mainli:Android-So-Handler:load-hook-plugin:${SO_PLUGIN_VERSION}")
-            classpath("com.github.Android-Mainli:Android-So-Handler:file-plugin:${SO_PLUGIN_VERSION}")
+            classpath("com.github.mcxinyu.Android-So-Handler:load-hook-plugin:${SO_PLUGIN_VERSION}")
+            classpath("com.github.mcxinyu.Android-So-Handler:file-plugin:${SO_PLUGIN_VERSION}")
         }
     }
 }
 ```
 
 ```kotlin "app/build.gradle.kts"
+plugins {
+    // ...
+    id("com.imf.plugin.so.ApkSoFileAdjustPlugin")
+    id("com.imf.plugin.so.SoLoadHookPlugin")
+}
 dependencies {
     val SO_PLUGIN_VERSION by project
     listOf(
