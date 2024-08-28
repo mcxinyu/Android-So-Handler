@@ -17,7 +17,7 @@ open class SoFileExtensions {
             return field
         }
 
-    var useApktool: Boolean = false
+    var useApktool: Boolean = true
 
     /**
      * 7z
@@ -42,6 +42,8 @@ open class SoFileExtensions {
 
     /**
      * 删除 so 的回调， File 是 so 文件，String 是 md5
+     *
+     * 此回调调用后，文件会正式被删除，被调用方应该返回文件上传到 CDN 的 url
      */
     var onDeleteSo: ((File, String) -> String)? = null
 

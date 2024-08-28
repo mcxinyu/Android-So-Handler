@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 - 2016 KeepSafe Software, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class ElfParser implements Closeable, Elf {
-    private final int MAGIC = 0x464C457F;
+    private final static int MAGIC = 0x464C457F;
+    private final FileInputStream inputStream;
     private final FileChannel channel;
     private final File mFile;
 
@@ -39,8 +40,8 @@ public class ElfParser implements Closeable, Elf {
         }
         mFile = file;
 
-        final FileInputStream inputStream = new FileInputStream(file);
-        this.channel = inputStream.getChannel();
+        inputStream = new FileInputStream(file);
+        channel = inputStream.getChannel();
     }
 
     public Header parseHeader() throws IOException {
@@ -50,7 +51,7 @@ public class ElfParser implements Closeable, Elf {
         final ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         if (readWord(buffer, 0) != MAGIC) {
-            throw new IllegalArgumentException("Invalid ELF Magic!");
+            throw new IllegalArgumentException("Invalid ELF Magic! " + mFile.getName());
         }
 
         final short fileClass = readByte(buffer, 0x4);
@@ -145,7 +146,8 @@ public class ElfParser implements Closeable, Elf {
 
     @Override
     public void close() throws IOException {
-        this.channel.close();
+        channel.close();
+        inputStream.close();
     }
 
     protected String readString(final ByteBuffer buffer, long offset) throws IOException {

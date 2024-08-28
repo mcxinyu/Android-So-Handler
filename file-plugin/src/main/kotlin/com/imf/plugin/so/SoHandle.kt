@@ -212,7 +212,7 @@ class SoHandle(
         // 在不需要全部依赖下, 尝试进行依赖简化
         log("是否全部保留依赖: ${extension.neededRetainAllDependencies}------ 解析出的依赖: ${dependenciesSet}")
         if (!extension.neededRetainAllDependencies) {
-            if (!dependenciesSet.isNullOrEmpty()) {
+            if (dependenciesSet.isNotEmpty()) {
                 dependenciesSet = dependenciesSet.stream()
                     .filter {
                         (deleteSoLibs?.contains(it) ?: false)

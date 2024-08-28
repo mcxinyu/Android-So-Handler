@@ -1,11 +1,11 @@
 package com.imf.plugin.so
 
-import brut.androlib.Androlib
+import brut.androlib.ApkBuilder
 import brut.androlib.ApkDecoder
-import brut.androlib.options.BuildOptions
+import brut.androlib.Config
+import brut.directory.ExtFile
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApkVariant
-import com.android.build.gradle.api.BaseVariantOutput
 import com.elf.ElfParser
 import com.google.gson.Gson
 import com.mainli.apk.ApkSign
@@ -39,11 +39,12 @@ open class ApkSoLibStreamlineTask @Inject constructor(
                     System.exit(2)
                 }
                 val oldSize = apkFile!!.length()
-                val newApk = if (pluginConfig.useApktool) {
-                    streamlineApkSoFileByApkTool(apkFile)
-                } else {
-                    streamlineApkSoFile(apkFile)
-                }
+                val newApk =
+                    if (pluginConfig.useApktool) {
+                        streamlineApkSoFileByApkTool(apkFile)
+                    } else {
+                        streamlineApkSoFile(apkFile)
+                    }
                 if (newApk?.exists() == true) {
                     val signApk = ApkSign.sign(newApk, it)
                     newApk.delete()
@@ -90,23 +91,24 @@ open class ApkSoLibStreamlineTask @Inject constructor(
         if (apk == null || !apk.exists()) {
             return null
         }
-        val outPutApk = File(apk.parentFile, "_streamlineApkBySoFile.apk")
-        if (outPutApk.exists()) {
-            outPutApk.delete()
+
+        // 解析 apk
+        val apkDecoder = ApkDecoder(
+            Config.getDefaultConfig().also {
+                it.forceDelete = true
+                it.decodeSources = Config.DECODE_SOURCES_NONE
+            },
+            apk
+        )
+        val outDir = File(apk.parentFile.path + File.separator + apk.nameWithoutExtension).also {
+            if (it.exists()) println("apkDecoder outDir delete " + it.delete())
         }
+        apkDecoder.decode(outDir)
 
-        val apkDecoder = ApkDecoder()
-        apkDecoder.setApkFile(apk)
-        val outDir = File(apk.parentFile.path + File.separator + apk.nameWithoutExtension)
-        outDir.delete()
-        apkDecoder.setOutDir(outDir)
-        apkDecoder.setForceDelete(true)
-        apkDecoder.setDecodeSources(ApkDecoder.DECODE_SOURCES_NONE)
-        apkDecoder.decode()
-
-        val streamlineDir = File(apk.canonicalFile.parentFile, "apktoolline")
-        streamlineDir.delete()
-        streamlineDir.mkdirs()
+        val streamlineDir = File(apk.canonicalFile.parentFile, "apktoolline").also {
+            if (it.exists()) it.delete()
+            it.mkdirs()
+        }
 
         outDir.listFiles()?.forEach { libDir ->
             if (libDir.isDirectory) {
@@ -126,12 +128,14 @@ open class ApkSoLibStreamlineTask @Inject constructor(
             Gson().toJson(record)
         )
 
+        // 重新打包 apk
         val file = outDir.parentFile.resolve("_" + outDir.name + ".apk")
-        Androlib(
-            BuildOptions().apply {
-                useAapt2 = true
-            }
-        ).build(outDir, file)
+        ApkBuilder(
+            Config.getDefaultConfig().also {
+                it.useAapt2 = true
+            },
+            ExtFile(outDir)
+        ).build(file)
         outDir.delete()
         return file
     }
@@ -148,15 +152,17 @@ open class ApkSoLibStreamlineTask @Inject constructor(
                 }
                 abi.listFiles()
                     ?.forEach { aSo ->
-                        record[abi.name]?.set(
-                            aSo.nameWithoutExtension.substring(3),
-                            HandleSoFileInfo(
-                                false,
-                                null,
-                                aSo.getNeededDependencies(),
-                                null
+                        runCatching { aSo.getNeededDependencies() }.onSuccess { dependencies ->
+                            record[abi.name]?.set(
+                                aSo.nameWithoutExtension.substring(3),
+                                HandleSoFileInfo(
+                                    false,
+                                    null,
+                                    dependencies,
+                                    null
+                                )
                             )
-                        )
+                        }
                     }
             }
         }
@@ -212,13 +218,21 @@ open class ApkSoLibStreamlineTask @Inject constructor(
         }
     }
 
+    /**
+     * 处理要删除的 so
+     *
+     * @param libDir File
+     * @param streamlineDir File
+     */
     private fun handleDeleteSo(libDir: File, streamlineDir: File) {
         if (pluginConfig.deleteSoLibs.isNullOrEmpty()) {
             return
         }
 
-        val backupDeleteSoDir = File(streamlineDir, "backupDeleteSo")
-        backupDeleteSoDir.delete()
+        val backupDeleteSoDir = File(streamlineDir, "backupDeleteSo").also {
+            if (it.exists()) it.delete()
+            it.mkdirs()
+        }
         libDir.listFiles()?.forEach { abi ->
             if (abi.isDirectory) {
                 if (record[abi.name] == null) {
@@ -292,6 +306,8 @@ open class ApkSoLibStreamlineTask @Inject constructor(
 
     /**
      * 直接当成 zip 解压后处理 so
+     *
+     * 这种方式虽然轻便，但是有时候会出问题，建议使用 [streamlineApkSoFileByApkTool]
      *
      * @param apk
      * @return

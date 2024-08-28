@@ -18,7 +18,7 @@ private const val ANNOTATION = "Lcom/imf/so/KeepSystemLoadLib;"
 /**
  * @author <a href=mailto:mcxinyu@foxmail.com>yuefeng</a> in 2023/6/6.
  */
-class LoadLibraryVisitor(classVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM7, classVisitor) {
+class LoadLibraryVisitor(classVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM9, classVisitor) {
     private var isClassSkip = false
     private var className: String? = null
 
@@ -76,7 +76,7 @@ class LoadLibraryVisitor(classVisitor: ClassVisitor) : ClassVisitor(Opcodes.ASM7
         val methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions)
         // 这里我们修改了MethodVisitor再返回，即修改了这个方法
         return if (isClassSkip) methodVisitor
-        else object : MethodVisitor(Opcodes.ASM7, methodVisitor) {
+        else object : MethodVisitor(Opcodes.ASM9, methodVisitor) {
             private var isMethodSkip = false
 
             override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor {

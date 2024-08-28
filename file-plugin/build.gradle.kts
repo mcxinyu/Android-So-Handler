@@ -33,7 +33,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.google.gradle:osdetector-gradle-plugin:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.apktool:apktool-lib:2.7.0")
+    // https://github.com/iBotPeaches/Apktool
+    implementation("org.apktool:apktool-lib:2.9.3")
     implementation("org.apache.commons:commons-io:1.3.2")
 }
 
